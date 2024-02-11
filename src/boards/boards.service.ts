@@ -29,4 +29,9 @@ export class BoardsService {
   getBoardById(id: string): Board {
     return this.boards.find((board) => board.id === id);
   }
+
+  //특정 게시물 삭제
+  deleteBoardById(id: string): void {
+    this.boards = this.boards.filter((board) => board.id !== id);
+  }
 }
