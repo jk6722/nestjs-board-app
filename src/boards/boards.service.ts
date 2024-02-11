@@ -24,4 +24,9 @@ export class BoardsService {
     this.boards.push(board);
     return board;
   }
+
+  //특정 게시물 조회
+  getBoardById(id: string): Board {
+    return this.boards.find((board) => board.id === id);
+  }
 }
