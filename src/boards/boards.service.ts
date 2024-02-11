@@ -1,48 +1,61 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Board, BoardStatus } from './board.model';
-import { v1 as uuid } from 'uuid';
+import { BoardStatus } from './board-status.enum';
 import { CreateBoardDto } from './\bdto/request/create-board.dto';
+import { Board } from './board.entity';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class BoardsService {
-  private boards: Board[] = [];
+  constructor(
+    @InjectRepository(Board)
+    private readonly boardRepository: Repository<Board>,
+  ) {}
 
-  //모든 게시물 반환
-  getAllBoards(): Board[] {
-    return this.boards;
+  //모든 게시물 조회
+  async getAllBoards(): Promise<Board[]> {
+    return this.boardRepository.find();
   }
 
   //게시물 생성
-  createBoard(createBoardDto: CreateBoardDto): Board {
+  async createBoard(createBoardDto: CreateBoardDto): Promise<Board> {
     const { title, description } = createBoardDto;
-    const board: Board = {
-      id: uuid(),
+
+    const board = this.boardRepository.create({
       title,
       description,
       status: BoardStatus.PUBLIC,
-    };
-    this.boards.push(board);
+    });
+
+    await this.boardRepository.save(board);
     return board;
   }
 
   //특정 게시물 조회
-  getBoardById(id: string): Board {
-    const findBoard = this.boards.find((board) => board.id === id);
+  async getBoardById(id: number): Promise<Board> {
+    const findBoard = await this.boardRepository.findOneBy({ id });
+
     if (!findBoard)
       throw new NotFoundException(`Can't find Board with id ${id}`);
+
     return findBoard;
   }
 
   //특정 게시물 삭제
-  deleteBoardById(id: string): void {
-    const findBoard = this.getBoardById(id);
-    this.boards = this.boards.filter((board) => board.id !== findBoard.id);
+  async deleteBoardById(id: number): Promise<void> {
+    const result = await this.boardRepository.delete(id);
+    if (result.affected === 0) {
+      throw new NotFoundException(`Can't find board with id ${id}`);
+    }
   }
 
   //특정 게시물 상태 업데이트
-  updateBoardStatus(id: string, status: BoardStatus): Board {
-    const findBoard = this.getBoardById(id);
+  async updateBoardStatus(id: number, status: BoardStatus): Promise<Board> {
+    const findBoard = await this.getBoardById(id);
+
     findBoard.status = status;
+    this.boardRepository.save(findBoard);
+
     return findBoard;
   }
 }
