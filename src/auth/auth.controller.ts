@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, ValidationPipe } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthCredentialDto } from './dto/request/auth-credential.dto';
 
@@ -8,7 +8,9 @@ export class AuthController {
 
   //회원 생성
   @Post('/signup')
-  createUser(@Body() authCredentialDto: AuthCredentialDto): Promise<void> {
+  createUser(
+    @Body(ValidationPipe) authCredentialDto: AuthCredentialDto,
+  ): Promise<void> {
     return this.authService.createUser(authCredentialDto);
   }
 }
