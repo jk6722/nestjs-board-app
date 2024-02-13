@@ -13,4 +13,12 @@ export class AuthController {
   ): Promise<void> {
     return this.authService.createUser(authCredentialDto);
   }
+
+  //로그인
+  @Post('/signin')
+  signIn(
+    @Body(ValidationPipe) authCredentialDto: AuthCredentialDto,
+  ): Promise<string> {
+    return this.authService.signIn(authCredentialDto);
+  }
 }
