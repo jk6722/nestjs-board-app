@@ -4,6 +4,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { User } from './user.entity';
 import { Repository } from 'typeorm';
+import * as config from 'config';
+
+const jwtConfig = config.get('jwt');
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -15,7 +18,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     super({
       //토큰이 유효한지 체크하기 위한 Secret Text
       //토큰을 생성할 때 사용한 Secret Text와 동일한 값을 써야 한다.
-      secretOrKey: 'Secret Text',
+      secretOrKey: jwtConfig.secret,
       //토큰을 어디서 꺼내오는지를 명시
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
     });
